@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TextChunkerService } from '../embeddings/text-chunker/text-chunker.service';
 import { DocumentParserService } from './document-parser.service';
+import { EmbeddingService } from '../embeddings/embedding.service';
 
 import {
   CompanyDocument,
@@ -26,6 +27,8 @@ export class DocumentsService {
     private readonly parserService: DocumentParserService,
 
     private readonly textChunkerService: TextChunkerService,
+
+    private readonly embeddingService: EmbeddingService,
   ) {}
 
   async upload(
@@ -65,6 +68,11 @@ export class DocumentsService {
       console.log(`\nChunk ${index + 1}\n`);
       console.log(chunk);
     });
+
+    // Trigger embedding pipeline
+    await this.embeddingService.processDocument(
+      document._id.toString(),
+    );
 
     return {
       message: 'File uploaded successfully',

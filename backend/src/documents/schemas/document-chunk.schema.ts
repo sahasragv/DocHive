@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+import { EmbeddingStatus } from 'src/embeddings/enums/embedding-status.enum';
 
 export type DocumentChunkDocument =
   HydratedDocument<DocumentChunk>;
@@ -26,9 +27,15 @@ export class DocumentChunk {
   text!: string;
 
   @Prop({
+    enum: EmbeddingStatus,
+    default: EmbeddingStatus.PENDING,
+  })
+  embeddingStatus!: EmbeddingStatus;
+
+  @Prop({
     default: null,
   })
-  embedding?: number[];
+  vectorId?: string;
 }
 
 export const DocumentChunkSchema =
