@@ -7,6 +7,7 @@ import { Model, Types } from 'mongoose';
 
 import { OllamaProvider } from './providers/ollama/ollama.provider';
 import { EmbeddingStatus } from './enums/embedding-status.enum';
+import { VectorService } from '../vector/vector.service';
 
 import {
   DocumentChunk,
@@ -22,6 +23,8 @@ export class EmbeddingService {
     private readonly chunkModel: Model<DocumentChunkDocument>,
 
     private readonly ollamaProvider: OllamaProvider,
+
+    private readonly vectorService: VectorService,
   ) {}
 
   async processDocument(documentId: string): Promise<void> {
@@ -44,19 +47,41 @@ export class EmbeddingService {
         return;
       }
 
-      await this.chunkModel.updateMany(
-        {
-          documentId: objectId,
-        },
-        {
-          embeddingStatus: EmbeddingStatus.PROCESSING,
-        },
+      await this.chunkModel.bulkWrite(
+        chunks.map((chunk) => ({
+          updateOne: {
+            filter: {
+              _id: chunk._id,
+            },
+            update: {
+              $set: {
+                vectorId: chunk._id.toString(),
+                embeddingStatus: EmbeddingStatus.COMPLETED,
+              },
+            },
+          },
+        })),
       );
 
       const texts = chunks.map((chunk) => chunk.text);
 
       const embeddings =
         await this.ollamaProvider.generateEmbeddings(texts);
+      
+      await this.vectorService.upsert(
+        chunks.map((chunk, index) => ({
+          id: chunk._id.toString(),
+          embedding: embeddings[index],
+          document: chunk.text,
+          metadata: {
+            documentId,
+            chunkIndex: chunk.chunkIndex,
+          },
+        })),
+      );
+      this.logger.log(
+        'Embeddings stored in ChromaDB',
+      );
 
       this.logger.log(
         `Generated ${embeddings.length} embeddings`,
