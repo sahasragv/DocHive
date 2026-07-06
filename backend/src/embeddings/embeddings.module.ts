@@ -1,8 +1,30 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
+import { MongooseModule } from '@nestjs/mongoose';
+
 import { TextChunkerService } from './text-chunker/text-chunker.service';
+import { EmbeddingService } from './embedding.service';
+import { OllamaProvider } from './providers/ollama/ollama.provider';
+import {
+  DocumentChunk,
+  DocumentChunkSchema,
+} from '../documents/schemas/document-chunk.schema';
 
 @Module({
-  providers: [TextChunkerService],
-  exports: [TextChunkerService],
+  imports: [
+    HttpModule,
+    MongooseModule.forFeature([
+      { name: DocumentChunk.name, schema: DocumentChunkSchema },
+    ]),
+  ],
+  providers: [
+    TextChunkerService,
+    EmbeddingService,
+    OllamaProvider,
+  ],
+  exports: [
+    TextChunkerService,
+    EmbeddingService,
+  ],
 })
 export class EmbeddingsModule {}

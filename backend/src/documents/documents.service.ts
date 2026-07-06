@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TextChunkerService } from '../embeddings/text-chunker/text-chunker.service';
 import { DocumentParserService } from './document-parser.service';
+import { EmbeddingService } from '../embeddings/embedding.service';
+
 
 import {
   CompanyDocument,
@@ -16,6 +18,8 @@ import {
 
 @Injectable()
 export class DocumentsService {
+  private readonly logger = new Logger(DocumentsService.name);
+
   constructor(
     @InjectModel(CompanyDocument.name)
     private readonly documentModel: Model<DocumentDocument>,
@@ -26,6 +30,8 @@ export class DocumentsService {
     private readonly parserService: DocumentParserService,
 
     private readonly textChunkerService: TextChunkerService,
+
+    private readonly embeddingService: EmbeddingService,
   ) {}
 
   async upload(
@@ -49,22 +55,20 @@ export class DocumentsService {
     const chunks =
       this.textChunkerService.splitText(extractedText);
     
-    for (let i = 0; i < chunks.length; i++) {
-      await this.chunkModel.create({
+    const chunkDocuments = chunks.map((text, index) => ({
       documentId: document._id,
-      chunkIndex: i,
-      text: chunks[i],
-      });
-    }
+      chunkIndex: index,
+      text,
+    }));
 
-    console.log(
-      `Total Chunks: ${chunks.length}`,
+    await this.chunkModel.insertMany(chunkDocuments);
+
+    this.logger.log(`Created ${chunks.length} chunks`);
+
+    // Trigger embedding pipeline
+    await this.embeddingService.processDocument(
+      document._id.toString(),
     );
-
-    chunks.forEach((chunk, index) => {
-      console.log(`\nChunk ${index + 1}\n`);
-      console.log(chunk);
-    });
 
     return {
       message: 'File uploaded successfully',
