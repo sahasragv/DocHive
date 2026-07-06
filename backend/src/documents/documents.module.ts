@@ -6,6 +6,7 @@ import { EmbeddingsModule } from '../embeddings/embeddings.module';
 import { DocumentsController } from './documents.controller';
 import { DocumentsService } from './documents.service';
 import { DocumentParserService } from './document-parser.service';
+import { DocumentChunkService } from './document-chunk.service';
 
 import {
   CompanyDocument,
@@ -35,7 +36,10 @@ import {
   providers: [
     DocumentsService,
     DocumentParserService,
+    DocumentChunkService,
   ],
-  exports: [DocumentsService],
+  exports: [DocumentsService,
+    DocumentChunkService,
+  ],
 })
 export class DocumentsModule {}
