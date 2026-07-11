@@ -13,6 +13,7 @@ import { ChatModule } from './chat/chat.module';
 import { LlmModule } from './llm/llm.module';
 import { VectorModule } from './vector/vector.module';
 import { EmbeddingsModule } from './embeddings/embeddings.module';
+import { RetrievalModule } from './retrieval/retrieval.module';
 
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
@@ -44,6 +45,8 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
     LlmModule,
     VectorModule,
     EmbeddingsModule,
+    RetrievalModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
