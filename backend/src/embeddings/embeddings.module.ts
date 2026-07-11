@@ -16,14 +16,12 @@ import {
 @Module({
   imports: [
     HttpModule,
-
     MongooseModule.forFeature([
       {
         name: DocumentChunk.name,
         schema: DocumentChunkSchema,
       },
     ]),
-
     VectorModule,
   ],
   providers: [
@@ -34,6 +32,7 @@ import {
   exports: [
     TextChunkerService,
     EmbeddingService,
+    OllamaProvider,
   ],
 })
 export class EmbeddingsModule {}

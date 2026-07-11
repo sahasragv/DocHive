@@ -22,28 +22,40 @@ export class OllamaProvider implements EmbeddingProvider {
     try {
       const baseUrl = this.configService.get<string>('OLLAMA_BASE_URL');
       const model = this.configService.get<string>('OLLAMA_EMBED_MODEL');
-  
+
       this.logger.log(
         `Generating embeddings for ${texts.length} chunk(s)`,
       );
-  
+
       const response = await firstValueFrom(
         this.httpService.post(`${baseUrl}/api/embed`, {
           model,
           input: texts,
         }),
       );
-  
+
       return response.data.embeddings;
     } catch (error) {
       this.logger.error(
         'Failed to generate embeddings',
         error instanceof Error ? error.stack : undefined,
       );
-  
+
       throw new InternalServerErrorException(
         'Failed to generate embeddings',
       );
     }
+  }
+
+  async generateEmbedding(text: string): Promise<number[]> {
+    const embeddings = await this.generateEmbeddings([text]);
+
+    if (!embeddings.length) {
+      throw new InternalServerErrorException(
+        'No embedding returned from Ollama',
+      );
+    }
+
+    return embeddings[0];
   }
 }
