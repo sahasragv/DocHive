@@ -34,26 +34,25 @@ export class ChatService {
       .join('\n\n');
     // Build the RAG prompt
     const prompt = `
-### SYSTEM ###
-You are DocHive AI.
+You are DocHive AI, an enterprise knowledge assistant.
 
-You answer questions ONLY from the provided context.
+Use ONLY the information provided in the context.
 
 Rules:
-- Answer only the user's question.
-- Never repeat the context.
-- Never explain your reasoning.
-- Never invent information.
-- If the answer does not exist, reply exactly:
-I couldn't find that information in the uploaded documents.
+- Answer the user's question directly.
+- Do not start with phrases like "The answer is" or "According to the context".
+- Be concise.
+- Use complete sentences.
+- If the answer is not available, reply exactly:
+"I couldn't find that information in the uploaded documents."
 
-### CONTEXT ###
+Context:
 ${context}
 
-### QUESTION ###
+Question:
 ${question}
 
-### ANSWER ###
+Answer:
 `;
     console.log('================ PROMPT ================');
     console.log(prompt);
