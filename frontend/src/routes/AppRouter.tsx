@@ -10,8 +10,14 @@ const AppRouter = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
+          <Route
+      path="/"
+      element={
+        localStorage.getItem('token')
+          ? <Navigate to="/dashboard" replace />
+          : <Navigate to="/login" replace />
+      }
+    />
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/upload" element={<UploadPage />} />
