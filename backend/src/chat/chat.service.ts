@@ -11,28 +11,26 @@ export class ChatService {
   ) {}
 
   async chat(question: string) {
-    // Retrieve relevant document chunks
     const retrieval = await this.retrievalService.search(question);
 
-    // Remove duplicate chunks (same content)
     const uniqueResults = retrieval.results.filter(
       (result, index, self) =>
         index ===
         self.findIndex(
-          (r) => r.document === result.document,
+          (r) =>
+            r.documentId === result.documentId &&
+            r.chunkIndex === result.chunkIndex,
         ),
     );
 
-    // Use only the top 3 unique chunks
     const selectedResults = uniqueResults.slice(0, 3);
 
-    // Build context for the LLM
     const context = selectedResults
       .map(
         (r, index) => `Document ${index + 1}:\n${r.document}`,
       )
       .join('\n\n');
-    // Build the RAG prompt
+
     const prompt = `
 You are DocHive AI, an enterprise knowledge assistant.
 
@@ -54,20 +52,15 @@ ${question}
 
 Answer:
 `;
-    console.log('================ PROMPT ================');
-    console.log(prompt);
-    console.log('========================================');
-    // Generate answer from TinyLlama
+
     const answer = await this.llmService.generate(prompt);
-    console.log('================ ANSWER ================');
-    console.log(answer);
-    console.log('========================================');
+
     return {
-      question,
       answer,
       sources: selectedResults.map((result) => ({
         documentId: result.documentId,
         chunkIndex: result.chunkIndex,
+        score: result.score,
       })),
     };
   }
