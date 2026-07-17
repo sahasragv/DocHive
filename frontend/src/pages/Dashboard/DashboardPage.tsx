@@ -161,7 +161,7 @@ const DashboardPage = () => {
             </div>
 
             <h3 className="mt-5 text-xl font-semibold">
-              AI Chat
+              Go to AI Assistant
             </h3>
 
             <p className="mt-3 text-sm text-slate-500">

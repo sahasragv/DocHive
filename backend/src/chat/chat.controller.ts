@@ -10,7 +10,7 @@ export class ChatController {
   ) {}
 
   @Post()
-  async chat(
+  chat(
     @Body() dto: ChatRequestDto,
   ) {
     return this.chatService.chat(dto.question);

@@ -38,21 +38,33 @@ export class AuthService {
   }
 
   async login(dto: any) {
-    const user = await this.usersService.findByEmail(dto.email);
-
-    if (!user) {
-      throw new Error('Invalid credentials');
-    }
-
-    const isMatch = await bcrypt.compare(dto.password, user.password);
-
-    if (!isMatch) {
-      throw new Error('Invalid credentials');
-    }
-
-    const payload = { sub: user._id, email: user.email };
-    const accessToken = this.jwtService.sign(payload);
-
-    return { accessToken };
+  const user = await this.usersService.findByEmail(dto.email);
+ 
+  if (!user) {
+    throw new Error('Invalid credentials');
   }
-}
+ 
+  const isMatch = await bcrypt.compare(dto.password, user.password);
+ 
+  if (!isMatch) {
+    throw new Error('Invalid credentials');
+  }
+ 
+  const payload = {
+    sub: user._id,
+    email: user.email,
+  };
+ 
+  const accessToken = this.jwtService.sign(payload);
+ 
+  console.log('==============================');
+  console.log('LOGIN CALLED');
+  console.log(
+    JSON.parse(
+      Buffer.from(accessToken.split('.')[1], 'base64').toString(),
+    ),
+  );
+  console.log('==============================');
+ 
+  return { accessToken };
+  }}
