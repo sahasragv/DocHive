@@ -25,6 +25,9 @@ export class ChatService {
 
     const selectedResults = uniqueResults.slice(0, 3);
 
+    console.log('Retrieved Results:');
+    console.dir(uniqueResults, { depth: null });
+
     const context = selectedResults
       .map(
         (r, index) => `Document ${index + 1}:\n${r.document}`,

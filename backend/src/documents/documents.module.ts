@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { EmbeddingsModule } from '../embeddings/embeddings.module';
+import { VectorModule } from '../vector/vector.module';
 
 import { DocumentsController } from './documents.controller';
 import { DocumentsService } from './documents.service';
@@ -31,6 +32,7 @@ import {
       },
     ]),
     EmbeddingsModule,
+    VectorModule,
   ],
   controllers: [DocumentsController],
   providers: [
@@ -38,7 +40,8 @@ import {
     DocumentParserService,
     DocumentChunkService,
   ],
-  exports: [DocumentsService,
+  exports: [
+    DocumentsService,
     DocumentChunkService,
   ],
 })

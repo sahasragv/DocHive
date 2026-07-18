@@ -25,6 +25,12 @@ export class CompanyDocument {
 
   @Prop({ default: 'uploaded' })
   status!: string;
+
+  @Prop({ default: Date.now })
+  createdAt!: Date;
+
+  @Prop({ default: Date.now })
+  updatedAt!: Date;
 }
 
 export const DocumentSchema =
