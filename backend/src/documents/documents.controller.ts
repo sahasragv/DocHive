@@ -2,6 +2,8 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
+  Param,
   UseInterceptors,
   UploadedFile,
   UseGuards,
@@ -65,5 +67,12 @@ export class DocumentsController {
   @Get()
   async getDocuments() {
     return this.documentsService.findAll();
+  }
+
+  @Delete(':id')
+  async deleteDocument(
+    @Param('id') id: string,
+  ) {
+    return this.documentsService.deleteDocument(id);
   }
 }
