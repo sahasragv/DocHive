@@ -3,13 +3,17 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-import { login } from '../../services/api';
+import { login, register } from '../../services/api';
 
 const LoginPage = () => {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
+  const [success, setSuccess] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,8 +23,26 @@ const LoginPage = () => {
 
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
+      if (isRegister) {
+        if (password !== confirmPassword) {
+          setError('Passwords do not match');
+          return;
+        }
+
+        await register({ name, email, password });
+
+        setSuccess('Account created successfully. Please sign in.');
+        setIsRegister(false);
+        setName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        return;
+      }
+
       const response = await login({
         email,
         password,
@@ -107,9 +129,51 @@ const LoginPage = () => {
             />
           </div>
 
+          {isRegister && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Confirm Password
+              </label>
+
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) =>
+                  setConfirmPassword(event.target.value)
+                }
+                placeholder="••••••••"
+                required
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+              />
+            </div>
+          )}
+
+          {isRegister && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-slate-700">
+                Name
+              </label>
+
+              <input
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Your name"
+                required
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+              />
+            </div>
+          )}
+
           {error && (
             <div className="rounded-xl bg-red-100 border border-red-300 px-4 py-3 text-sm text-red-700">
               {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="rounded-xl bg-green-100 border border-green-300 px-4 py-3 text-sm text-green-700">
+              {success}
             </div>
           )}
 
@@ -119,9 +183,44 @@ const LoginPage = () => {
             className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-3 font-semibold text-white transition duration-300 hover:scale-[1.02] hover:shadow-xl disabled:opacity-60"
           >
             {loading
-              ? 'Signing In...'
+              ? isRegister
+                ? 'Creating Account...'
+                : 'Signing In...'
+              : isRegister
+              ? 'Create Account'
               : 'Sign In'}
           </button>
+
+          <div className="mt-3 text-center">
+            {!isRegister ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRegister(true);
+                  setError('');
+                  setSuccess('');
+                }}
+                className="text-sm text-violet-600 hover:underline"
+              >
+                Create Account
+              </button>
+            ) : (
+              <p className="text-sm text-slate-600">
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegister(false);
+                    setError('');
+                    setSuccess('');
+                  }}
+                  className="text-violet-600 hover:underline"
+                >
+                  Sign In
+                </button>
+              </p>
+            )}
+          </div>
         </form>
 
         <div className="mt-8 border-t pt-6">
