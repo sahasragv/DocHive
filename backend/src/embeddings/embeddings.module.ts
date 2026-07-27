@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TextChunkerService } from './text-chunker/text-chunker.service';
 import { EmbeddingService } from './embedding.service';
 import { OllamaProvider } from './providers/ollama/ollama.provider';
+import { GeminiProvider } from './providers/gemini/gemini.provider';
 
 import { VectorModule } from '../vector/vector.module';
 
@@ -28,11 +29,13 @@ import {
     TextChunkerService,
     EmbeddingService,
     OllamaProvider,
+    GeminiProvider,
   ],
   exports: [
     TextChunkerService,
     EmbeddingService,
     OllamaProvider,
+    GeminiProvider,
   ],
 })
 export class EmbeddingsModule {}

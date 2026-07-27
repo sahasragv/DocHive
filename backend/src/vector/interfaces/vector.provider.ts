@@ -1,16 +1,14 @@
-import { Metadata } from 'chromadb';
-
 export interface VectorDocument {
   id: string;
   embedding: number[];
   document: string;
-  metadata: Metadata;
+  metadata: Record<string, unknown>;
 }
 
 export interface VectorSearchResult {
   id: string;
   score: number;
-  metadata: Metadata;
+  metadata: Record<string, unknown>;
   document?: string;
 }
 

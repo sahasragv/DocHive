@@ -19,7 +19,8 @@ export class OllamaLlmProvider {
   async generate(prompt: string): Promise<string> {
     try {
       const baseUrl =
-        this.configService.get<string>('OLLAMA_BASE_URL');
+        this.configService.get<string>('OLLAMA_BASE_URL') ||
+        'http://localhost:11434';
 
       const model =
         this.configService.get<string>('OLLAMA_CHAT_MODEL');

@@ -1,177 +1,136 @@
-import { Link, useNavigate } from 'react-router-dom';
+import {
+  Database,
+  Files,
+  HardDrive,
+  MessageSquare,
+  Upload,
+  FolderOpen,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+import WelcomeBanner from '../../components/dashboard/WelcomeBanner';
+import RecentDocuments from '../../components/dashboard/RecentDocuments';
+import StatCard from '../../components/dashboard/StatCard';
 
 const DashboardPage = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+  const recentDocuments = [
+    { id: '1', name: 'Quarterly Report.docx', status: 'Indexed' },
+    { id: '2', name: 'Product Handbook.docx', status: 'Processing' },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#F8F7FC]">
+    <div className="space-y-8">
+      <WelcomeBanner />
 
-      {/* Header */}
-      <header className="border-b border-violet-100 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-5">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          title="Documents"
+          value={12}
+          subtitle="Uploaded files"
+          icon={Files}
+          color="bg-blue-100 text-blue-600"
+          trend="+12%"
+        />
 
-          <div className="flex items-center gap-4">
-            <img
-              src="/logo.png"
-              alt="DocHive"
-              className="h-12 w-12"
-            />
+        <StatCard
+          title="Chunks"
+          value={284}
+          subtitle="Indexed chunks"
+          icon={Database}
+          color="bg-violet-100 text-violet-600"
+          trend="+18%"
+        />
 
-            <div>
-              <h1 className="text-2xl font-bold text-violet-700">
-                DocHive
-              </h1>
+        <StatCard
+          title="AI Chats"
+          value={56}
+          subtitle="Questions answered"
+          icon={MessageSquare}
+          color="bg-emerald-100 text-emerald-600"
+          trend="+7%"
+        />
 
-              <p className="text-sm text-slate-500">
-                Enterprise AI Knowledge Platform
-              </p>
-            </div>
-          </div>
+        <StatCard
+          title="Storage"
+          value="2.4 GB"
+          subtitle="Used of 10 GB"
+          icon={HardDrive}
+          color="bg-amber-100 text-amber-600"
+        />
+      </div>
 
-          <button
-            onClick={handleLogout}
-            className="rounded-xl bg-violet-600 px-5 py-2 font-medium text-white transition hover:bg-violet-700"
-          >
-            Logout
-          </button>
-
-        </div>
-      </header>
-
-      {/* Body */}
-      <main className="mx-auto max-w-7xl px-8 py-10">
-
-        <div className="mb-10">
-          <h2 className="text-4xl font-bold text-slate-900">
-            Welcome Back 👋
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+        {/* Quick Actions */}
+        <section>
+          <h2 className="mb-6 text-2xl font-bold text-slate-900">
+            Quick Actions
           </h2>
 
-          <p className="mt-2 text-slate-600">
-            Manage your enterprise knowledge base and interact with your AI assistant.
-          </p>
-        </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            <Link
+              to="/upload"
+              className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+            >
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100">
+                <Upload
+                  className="text-blue-600"
+                  size={28}
+                />
+              </div>
 
-        {/* Stats */}
+              <h3 className="text-xl font-semibold text-slate-900">
+                Upload Documents
+              </h3>
 
-        <div className="grid gap-6 md:grid-cols-3">
+              <p className="mt-3 text-sm text-slate-500">
+                Upload DOCX or PDF files and build your AI knowledge base.
+              </p>
+            </Link>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-violet-100">
-            <div className="text-5xl">📄</div>
+            <Link
+              to="/documents"
+              className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
+            >
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100">
+                <FolderOpen
+                  className="text-amber-600"
+                  size={28}
+                />
+              </div>
 
-            <h3 className="mt-5 text-lg font-semibold">
-              Documents
-            </h3>
+              <h3 className="text-xl font-semibold text-slate-900">
+                Documents
+              </h3>
 
-            <p className="mt-2 text-4xl font-bold text-violet-700">
-              --
-            </p>
+              <p className="mt-3 text-sm text-slate-500">
+                Browse and manage all indexed enterprise documents.
+              </p>
+            </Link>
 
-            <p className="mt-2 text-sm text-slate-500">
-              Uploaded Files
-            </p>
+            <Link
+              to="/chat"
+              className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl md:col-span-2"
+            >
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100">
+                <MessageSquare
+                  className="text-emerald-600"
+                  size={28}
+                />
+              </div>
+
+              <h3 className="text-xl font-semibold text-slate-900">
+                AI Assistant
+              </h3>
+
+              <p className="mt-3 text-sm text-slate-500">
+                Ask questions and retrieve answers from your uploaded documents.
+              </p>
+            </Link>
           </div>
+        </section>
 
-          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-violet-100">
-            <div className="text-5xl">⚡</div>
-
-            <h3 className="mt-5 text-lg font-semibold">
-              Indexed
-            </h3>
-
-            <p className="mt-2 text-4xl font-bold text-violet-700">
-              --
-            </p>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Ready for Semantic Search
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-violet-100">
-            <div className="text-5xl">🧠</div>
-
-            <h3 className="mt-5 text-lg font-semibold">
-              AI Assistant
-            </h3>
-
-            <p className="mt-2 text-4xl font-bold text-violet-700">
-              Ready
-            </p>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Ask questions from your documents
-            </p>
-          </div>
-
-        </div>
-
-        {/* Quick Actions */}
-
-        <h2 className="mt-14 mb-6 text-2xl font-bold text-slate-900">
-          Quick Actions
-        </h2>
-
-        <div className="grid gap-6 md:grid-cols-3">
-
-          <Link
-            to="/upload"
-            className="rounded-3xl bg-white p-7 shadow-sm ring-1 ring-violet-100 transition hover:-translate-y-1 hover:shadow-xl"
-          >
-            <div className="text-5xl">
-              ⬆️
-            </div>
-
-            <h3 className="mt-5 text-xl font-semibold">
-              Upload Documents
-            </h3>
-
-            <p className="mt-3 text-sm text-slate-500">
-              Upload DOCX documents and build your AI knowledge base.
-            </p>
-          </Link>
-
-          <Link
-            to="/documents"
-            className="rounded-3xl bg-white p-7 shadow-sm ring-1 ring-violet-100 transition hover:-translate-y-1 hover:shadow-xl"
-          >
-            <div className="text-5xl">
-              📂
-            </div>
-
-            <h3 className="mt-5 text-xl font-semibold">
-              Documents
-            </h3>
-
-            <p className="mt-3 text-sm text-slate-500">
-              Browse all indexed enterprise documents.
-            </p>
-          </Link>
-
-          <Link
-            to="/chat"
-            className="rounded-3xl bg-white p-7 shadow-sm ring-1 ring-violet-100 transition hover:-translate-y-1 hover:shadow-xl"
-          >
-            <div className="text-5xl">
-              💬
-            </div>
-
-            <h3 className="mt-5 text-xl font-semibold">
-              Go to AI Assistant
-            </h3>
-
-            <p className="mt-3 text-sm text-slate-500">
-              Ask questions and get answers from your uploaded documents.
-            </p>
-          </Link>
-
-        </div>
-
-      </main>
+        <RecentDocuments documents={recentDocuments} />
+      </div>
     </div>
   );
 };
