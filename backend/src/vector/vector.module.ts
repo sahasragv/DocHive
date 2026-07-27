@@ -1,20 +1,24 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
+import {
+  DocumentChunk,
+  DocumentChunkSchema,
+} from '../documents/schemas/document-chunk.schema';
 import { VectorService } from './vector.service';
-import { ChromaProvider } from './providers/chroma.provider';
 
 @Module({
   imports: [
     ConfigModule,
+    MongooseModule.forFeature([
+      {
+        name: DocumentChunk.name,
+        schema: DocumentChunkSchema,
+      },
+    ]),
   ],
-  providers: [
-    VectorService,
-    ChromaProvider,
-  ],
-  exports: [
-    VectorService,
-    ChromaProvider,
-  ],
+  providers: [VectorService],
+  exports: [VectorService],
 })
 export class VectorModule {}

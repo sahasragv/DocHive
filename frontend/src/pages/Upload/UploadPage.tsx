@@ -1,5 +1,14 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  FileText,
+  UploadCloud,
+  Loader2,
+  XCircle,
+} from 'lucide-react';
+
 import { uploadDocument } from '../../services/api';
 
 const UploadPage = () => {
@@ -77,37 +86,47 @@ const UploadPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F7FC] p-8">
-      <div className="mx-auto max-w-3xl rounded-3xl bg-white p-10 shadow-sm ring-1 ring-violet-100">
+    <div className="space-y-8">
+      {/* Header */}
 
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="mb-8 flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-100"
-        >
-          ← Back to Dashboard
-        </button>
+      <div className="flex flex-col justify-between gap-6 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm md:flex-row md:items-center">
+        <div>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="mb-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+          >
+            <ArrowLeft size={16} />
+            Back to Dashboard
+          </button>
 
-        <h1 className="text-3xl font-bold text-violet-700">
-          Upload Documents
-        </h1>
+          <h1 className="text-3xl font-bold text-slate-900">
+            Upload Knowledge Base
+          </h1>
 
-        <p className="mt-2 text-slate-500">
-          Upload DOCX files to build your enterprise knowledge base.
-        </p>
+          <p className="mt-2 text-slate-500">
+            Upload DOCX documents and build your enterprise AI knowledge base.
+          </p>
+        </div>
+      </div>
 
-        <div className="mt-8 rounded-2xl border-2 border-dashed border-violet-300 bg-violet-50 p-12 text-center">
+      {/* Upload Card */}
 
-          <div className="text-6xl">
-            📄
+      <div className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm">
+        <div className="rounded-3xl border-2 border-dashed border-violet-300 bg-violet-50 p-12 text-center">
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-violet-100">
+            <UploadCloud
+              size={42}
+              className="text-violet-600"
+            />
           </div>
 
-          <h2 className="mt-5 text-xl font-semibold">
-            Choose a DOCX Document
+          <h2 className="mt-6 text-2xl font-semibold text-slate-900">
+            Upload DOCX Document
           </h2>
 
           <p className="mt-2 text-slate-500">
-            Supported format: .docx
+            Select a DOCX file to generate embeddings and make it searchable by
+            AI.
           </p>
 
           <input
@@ -120,68 +139,95 @@ const UploadPage = () => {
 
           <button
             onClick={handleChooseFile}
-            className="mt-6 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-violet-700"
+            className="mt-8 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-violet-700"
           >
             Browse Files
           </button>
 
           {file && (
-            <div className="mt-6 rounded-xl bg-white p-5 shadow-sm ring-1 ring-violet-100">
-              <p className="font-semibold text-slate-800">
-                {file.name}
-              </p>
+            <div className="mt-8 flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm">
+              <div className="rounded-xl bg-violet-100 p-3">
+                <FileText
+                  size={24}
+                  className="text-violet-600"
+                />
+              </div>
 
-              <p className="mt-1 text-sm text-slate-500">
-                {(file.size / 1024).toFixed(2)} KB
-              </p>
+              <div className="flex-1">
+                <h3 className="font-semibold text-slate-900">
+                  {file.name}
+                </h3>
+
+                <p className="text-sm text-slate-500">
+                  DOCX Document
+                </p>
+              </div>
+
+              <span className="text-sm text-slate-500">
+                {(file.size / 1024).toFixed(1)} KB
+              </span>
             </div>
           )}
 
           <button
             disabled={loading || !file}
             onClick={handleUpload}
-            className="mt-6 w-full rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-6 py-3 font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-6 py-3 font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading
-              ? 'Uploading...'
-              : 'Upload Document'}
+            {loading ? (
+              <>
+                <Loader2
+                  size={18}
+                  className="animate-spin"
+                />
+                Uploading...
+              </>
+            ) : (
+              <>
+                <UploadCloud size={18} />
+                Upload Document
+              </>
+            )}
           </button>
 
           {message && (
             <div
-              className={`mt-6 rounded-xl border p-4 text-center font-medium ${
+              className={`mt-8 flex items-center gap-3 rounded-2xl border p-5 ${
                 isSuccess
                   ? 'border-green-200 bg-green-50 text-green-700'
                   : 'border-red-200 bg-red-50 text-red-700'
               }`}
             >
-              {isSuccess ? '✅ ' : '❌ '}
-              {message}
+              {isSuccess ? (
+                <CheckCircle2 size={22} />
+              ) : (
+                <XCircle size={22} />
+              )}
+
+              <span className="font-medium">
+                {message}
+              </span>
             </div>
           )}
 
           {isSuccess && (
-            <div className="mt-6 flex flex-col gap-4 sm:flex-row">
-
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <button
-                onClick={() => navigate('/dashboard')}
-                className="flex-1 rounded-xl bg-violet-600 py-3 font-semibold text-white transition hover:bg-violet-700"
+                onClick={() => navigate('/chat')}
+                className="rounded-xl bg-violet-600 py-3 font-semibold text-white transition hover:bg-violet-700"
               >
-                Go to Dashboard
+                Ask AI
               </button>
 
               <button
                 onClick={handleUploadAnother}
-                className="flex-1 rounded-xl border border-violet-200 bg-white py-3 font-semibold text-violet-700 transition hover:bg-violet-50"
+                className="rounded-xl border border-slate-300 bg-white py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
               >
                 Upload Another
               </button>
-
             </div>
           )}
-
         </div>
-
       </div>
     </div>
   );

@@ -28,10 +28,16 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const uri = configService.get<string>('MONGO_URI');
+        const uri =
+          configService.get<string>('MONGODB_URI') ||
+          configService.get<string>('MONGO_URI');
+
         if (!uri) {
-          throw new Error('MONGO_URI environment variable is required');
+          throw new Error(
+            'MONGODB_URI or MONGO_URI environment variable is required',
+          );
         }
+
         return {
           uri,
         };

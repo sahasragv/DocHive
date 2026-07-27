@@ -20,7 +20,9 @@ export class OllamaProvider implements EmbeddingProvider {
 
   async generateEmbeddings(texts: string[]): Promise<number[][]> {
     try {
-      const baseUrl = this.configService.get<string>('OLLAMA_BASE_URL');
+      const baseUrl =
+        this.configService.get<string>('OLLAMA_BASE_URL') ||
+        'http://localhost:11434';
       const model = this.configService.get<string>('OLLAMA_EMBED_MODEL');
 
       this.logger.log(

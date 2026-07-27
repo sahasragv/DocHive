@@ -1,13 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
 import {
-  getDocuments,
   deleteDocument,
+  getDocuments,
 } from '../../services/api';
+
 import type { Document } from '../../types/document';
+
+import DocumentCard from '../../components/documents/DocumentCard';
+import DocumentToolbar from '../../components/documents/DocumentToolbar';
+import DeleteDocumentModal from '../../components/documents/DeleteDocumentModal';
 
 const DocumentsPage = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  const [selectedDocument, setSelectedDocument] =
+    useState<Document | null>(null);
+
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     loadDocuments();
@@ -16,7 +28,9 @@ const DocumentsPage = () => {
   const loadDocuments = async () => {
     try {
       setLoading(true);
+
       const data = await getDocuments();
+
       setDocuments(data);
     } catch (error) {
       console.error(error);
@@ -26,27 +40,36 @@ const DocumentsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this document?'
-    );
+  const handleDelete = (document: Document) => {
+    setSelectedDocument(document);
+  };
 
-    if (!confirmed) {
-      return;
-    }
+  const confirmDelete = async () => {
+    if (!selectedDocument) return;
 
     try {
-      await deleteDocument(id);
+      setDeleteLoading(true);
 
-      // Refresh document list
+      await deleteDocument(selectedDocument.id);
+
       await loadDocuments();
 
-      alert('Document deleted successfully');
+      setSelectedDocument(null);
     } catch (error) {
       console.error(error);
       alert('Failed to delete document');
+    } finally {
+      setDeleteLoading(false);
     }
   };
+
+  const filteredDocuments = useMemo(() => {
+    return documents.filter((doc) =>
+      doc.originalName
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [documents, search]);
 
   const formatSize = (size: number) => {
     if (size < 1024) return `${size} B`;
@@ -59,79 +82,51 @@ const DocumentsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 p-8">
-      <div className="mx-auto max-w-5xl">
-
-        <h1 className="mb-8 text-3xl font-bold">
-          📄 My Documents
-        </h1>
+    <>
+      <div className="space-y-8">
+        <DocumentToolbar
+          search={search}
+          onSearchChange={setSearch}
+        />
 
         {loading ? (
-          <p>Loading...</p>
-        ) : documents.length === 0 ? (
-          <div className="rounded-xl bg-white p-10 text-center shadow">
-            No documents uploaded yet.
+          <div className="rounded-3xl border border-slate-200 bg-white p-20 text-center shadow-sm">
+            <p className="text-lg font-medium text-slate-600">
+              Loading documents...
+            </p>
+          </div>
+        ) : filteredDocuments.length === 0 ? (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-20 text-center">
+            <h2 className="text-2xl font-bold text-slate-900">
+              No documents found
+            </h2>
+
+            <p className="mt-3 text-slate-500">
+              Upload a document or change your search.
+            </p>
           </div>
         ) : (
-          <div className="grid gap-5">
-            {documents.map((document) => (
-              <div
+          <div className="space-y-6">
+            {filteredDocuments.map((document) => (
+              <DocumentCard
                 key={document.id}
-                className="rounded-xl bg-white p-6 shadow"
-              >
-                <h2 className="text-xl font-semibold">
-                  {document.originalName}
-                </h2>
-
-                <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-
-                  <div>
-                    <strong>Status</strong>
-                    <p>{document.status}</p>
-                  </div>
-
-                  <div>
-                    <strong>Chunks</strong>
-                    <p>{document.chunkCount}</p>
-                  </div>
-
-                  <div>
-                    <strong>Uploaded</strong>
-                    <p>
-                      {new Date(document.uploadedAt).toLocaleString()}
-                    </p>
-                  </div>
-
-                  <div>
-                    <strong>Size</strong>
-                    <p>{formatSize(document.size)}</p>
-                  </div>
-
-                </div>
-
-                <div className="mt-6 flex gap-3">
-
-                  <button
-                    className="rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
-                  >
-                    View
-                  </button>
-
-                  <button
-                    onClick={() => handleDelete(document.id)}
-                    className="rounded bg-red-600 px-4 py-2 text-white transition hover:bg-red-700"
-                  >
-                    🗑 Delete
-                  </button>
-
-                </div>
-              </div>
+                document={document}
+                formatSize={formatSize}
+                onDelete={() => handleDelete(document)}
+              />
             ))}
           </div>
         )}
-
       </div>
-    </div>
+
+      <DeleteDocumentModal
+        isOpen={selectedDocument !== null}
+        documentName={selectedDocument?.originalName ?? ''}
+        loading={deleteLoading}
+        onCancel={() => setSelectedDocument(null)}
+        onConfirm={confirmDelete}
+      />
+    </>
   );
 };
 
