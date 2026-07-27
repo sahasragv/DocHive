@@ -3,7 +3,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { DocumentListDto } from './dto/document-list.dto';
-import { VectorService } from '../vector/vector.service';
 import { TextChunkerService } from '../embeddings/text-chunker/text-chunker.service';
 import { EmbeddingService } from '../embeddings/embedding.service';
 import { DocumentParserService } from './document-parser.service';
@@ -38,8 +37,6 @@ export class DocumentsService {
     private readonly textChunkerService: TextChunkerService,
 
     private readonly embeddingService: EmbeddingService,
-
-    private readonly vectorService: VectorService,
   ) {}
 
   async upload(
@@ -162,20 +159,6 @@ export class DocumentsService {
     if (!document) {
       throw new NotFoundException('Document not found');
     }
-
-    // Load chunks
-    const chunks = await this.chunkModel.find({
-      documentId: document._id,
-    });
-
-    // Delete vectors from ChromaDB
-    const vectorIds = chunks.map((chunk) => chunk._id.toString());
-
-    await this.vectorService.delete(vectorIds);
-
-    this.logger.log(
-      `Deleted ${vectorIds.length} vectors from ChromaDB`,
-    );
 
     // Delete uploaded file
     try {

@@ -36,6 +36,12 @@ export class DocumentChunk {
     default: null,
   })
   vectorId?: string;
+
+  @Prop({
+    type: [Number],
+    default: [],
+  })
+  embedding!: number[];
 }
 
 export const DocumentChunkSchema =

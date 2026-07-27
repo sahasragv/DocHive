@@ -11,14 +11,16 @@ export default function AppLayout({
   children,
 }: AppLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-[#F8F7FC]">
+    <div className="min-h-screen bg-slate-50">
       <Sidebar />
 
-      <div className="flex flex-1 flex-col">
+      <div className="ml-72 flex min-h-screen flex-col">
         <Header />
 
-        <main className="flex-1 p-8">
-          {children}
+        <main className="flex-1 overflow-y-auto p-8">
+          <div className="mx-auto w-full max-w-7xl">
+            {children}
+          </div>
         </main>
       </div>
     </div>

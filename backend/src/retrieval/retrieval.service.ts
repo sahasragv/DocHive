@@ -1,6 +1,12 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { OllamaProvider } from '../embeddings/providers/ollama/ollama.provider';
+import { GeminiProvider } from '../embeddings/providers/gemini/gemini.provider';
 import { VectorService } from '../vector/vector.service';
 
 @Injectable()
@@ -8,7 +14,9 @@ export class RetrievalService {
   private readonly logger = new Logger(RetrievalService.name);
 
   constructor(
+    private readonly configService: ConfigService,
     private readonly ollamaProvider: OllamaProvider,
+    private readonly geminiProvider: GeminiProvider,
     private readonly vectorService: VectorService,
   ) {}
 
@@ -21,8 +29,12 @@ export class RetrievalService {
 
     this.logger.log(`Searching: ${query}`);
 
-    const embedding =
-      await this.ollamaProvider.generateEmbedding(query);
+    const provider =
+      this.configService.get<string>('AI_PROVIDER') === 'cloud'
+        ? this.geminiProvider
+        : this.ollamaProvider;
+
+    const embedding = await provider.generateEmbedding(query);
 
     const topK = 2;
 
