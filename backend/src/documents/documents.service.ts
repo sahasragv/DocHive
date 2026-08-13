@@ -1,15 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as fs from 'fs/promises';
 
 import { DocumentListDto } from './dto/document-list.dto';
 import { TextChunkerService } from '../embeddings/text-chunker/text-chunker.service';
 import { EmbeddingService } from '../embeddings/embedding.service';
 import { DocumentParserService } from './document-parser.service';
-import * as fs from 'fs/promises';
-import {
-  NotFoundException,
-} from '@nestjs/common';
 
 import {
   CompanyDocument,
@@ -23,7 +24,9 @@ import {
 
 @Injectable()
 export class DocumentsService {
-  private readonly logger = new Logger(DocumentsService.name);
+  private readonly logger = new Logger(
+    DocumentsService.name,
+  );
 
   constructor(
     @InjectModel(CompanyDocument.name)
@@ -47,81 +50,112 @@ export class DocumentsService {
       `Uploading document: ${file.originalname}`,
     );
 
-    // Save document metadata
-    const document = await this.documentModel.create({
-      originalName: file.originalname,
-      filename: file.filename,
-      path: file.path,
-      mimetype: file.mimetype,
-      size: file.size,
-      uploadedBy: userId,
-      status: 'uploaded',
-    });
+    const document =
+      await this.documentModel.create({
+        originalName: file.originalname,
+        filename: file.filename,
+        path: file.path,
+        mimetype: file.mimetype,
+        size: file.size,
+        uploadedBy: userId,
+        status: 'uploaded',
+      });
 
-    this.logger.log('Extracting document text...');
+    try {
+      await this.documentModel.findByIdAndUpdate(
+        document._id,
+        {
+          status: 'processing',
+        },
+      );
 
-    // Extract text
-    const extractedText =
-      await this.parserService.extractText(file.path);
+      this.logger.log(
+        'Extracting document text...',
+      );
 
-    this.logger.log(
-      `Extracted ${extractedText.length} characters`,
-    );
+      const extractedText =
+        await this.parserService.extractText(
+          file.path,
+        );
 
-    // Chunk document
-    const chunks =
-      this.textChunkerService.splitText(extractedText);
+      this.logger.log(
+        `Extracted ${extractedText.length} characters`,
+      );
 
-    this.logger.log(
-      `Generated ${chunks.length} chunk(s)`,
-    );
+      const chunks =
+        this.textChunkerService.splitText(
+          extractedText,
+        );
 
-    // Debug chunks
-    console.log('\n========================================');
-    console.log('GENERATED CHUNKS');
-    console.log('========================================');
+      this.logger.log(
+        `Generated ${chunks.length} chunk(s)`,
+      );
 
-    chunks.forEach((chunk, index) => {
-      console.log(`\n----- Chunk ${index} -----\n`);
-      console.log(chunk);
-    });
+      const chunkDocuments = chunks.map(
+        (text, index) => ({
+          documentId: document._id,
+          chunkIndex: index,
+          text,
+        }),
+      );
 
-    console.log('\n========================================\n');
+      await this.chunkModel.insertMany(
+        chunkDocuments,
+      );
 
-    // Prepare chunk documents
-    const chunkDocuments = chunks.map((text, index) => ({
-      documentId: document._id,
-      chunkIndex: index,
-      text,
-    }));
+      this.logger.log(
+        `Stored ${chunkDocuments.length} chunks in MongoDB`,
+      );
 
-    // Store chunks
-    await this.chunkModel.insertMany(chunkDocuments);
+      await this.embeddingService.processDocument(
+        document._id.toString(),
+      );
 
-    this.logger.log(
-      `Stored ${chunkDocuments.length} chunks in MongoDB`,
-    );
+      await this.documentModel.findByIdAndUpdate(
+        document._id,
+        {
+          status: 'indexed',
+        },
+      );
 
-    // Generate embeddings + store vectors
-    await this.embeddingService.processDocument(
-      document._id.toString(),
-    );
+      this.logger.log(
+        'Document indexing completed successfully',
+      );
 
-    this.logger.log(
-      'Document indexing completed successfully',
-    );
+      return {
+        message: 'File uploaded successfully',
+        document: {
+          ...document.toObject(),
+          status: 'indexed',
+        },
+        extractedCharacters:
+          extractedText.length,
+        totalChunks: chunks.length,
+      };
+    } catch (error) {
+      await this.documentModel.findByIdAndUpdate(
+        document._id,
+        {
+          status: 'failed',
+        },
+      );
 
-    return {
-      message: 'File uploaded successfully',
-      document,
-      extractedCharacters: extractedText.length,
-      totalChunks: chunks.length,
-    };
+      this.logger.error(
+        'Document processing failed',
+        error,
+      );
+
+      throw error;
+    }
   }
 
-  async findAll(): Promise<DocumentListDto[]> {
+  async findAll(
+    userId: string,
+  ): Promise<DocumentListDto[]> {
     const documents = await this.documentModel
-      .find()
+      .find({
+        uploadedBy: userId,
+      })
       .sort({ createdAt: -1 });
 
     return Promise.all(
@@ -139,7 +173,8 @@ export class DocumentsService {
 
         return {
           id: String(document._id),
-          originalName: document.originalName,
+          originalName:
+            document.originalName,
           uploadedAt,
           status: document.status,
           chunkCount,
@@ -150,17 +185,26 @@ export class DocumentsService {
     );
   }
 
+  async deleteDocument(
+    id: string,
+    userId: string,
+  ) {
+    this.logger.log(
+      `Deleting document: ${id}`,
+    );
 
-  async deleteDocument(id: string) {
-    this.logger.log(`Deleting document: ${id}`);
-
-    const document = await this.documentModel.findById(id);
+    const document =
+      await this.documentModel.findOne({
+        _id: id,
+        uploadedBy: userId,
+      });
 
     if (!document) {
-      throw new NotFoundException('Document not found');
+      throw new NotFoundException(
+        'Document not found',
+      );
     }
 
-    // Delete uploaded file
     try {
       await fs.unlink(document.path);
     } catch {
@@ -169,19 +213,21 @@ export class DocumentsService {
       );
     }
 
-    // Delete chunks
     await this.chunkModel.deleteMany({
       documentId: document._id,
     });
 
-    // Delete document
-    await this.documentModel.findByIdAndDelete(id);
+    await this.documentModel.findByIdAndDelete(
+      id,
+    );
 
     this.logger.log(
       `Document ${id} deleted successfully`,
     );
 
     return {
-      message: 'Document deleted successfully',
+      message:
+        'Document deleted successfully',
     };
-  }}
+  }
+}
