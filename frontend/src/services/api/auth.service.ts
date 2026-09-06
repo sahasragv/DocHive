@@ -17,8 +17,14 @@ export const login = async (
   return response.data;
 };
 
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
 export const register = async (
-  data: LoginRequest,
+  data: RegisterRequest,
 ) => {
   const response = await api.post('/auth/register', data);
 

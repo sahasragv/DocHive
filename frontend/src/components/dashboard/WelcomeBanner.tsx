@@ -1,94 +1,26 @@
-import {
-  ArrowRight,
-  MessageSquare,
-  Upload,
-} from 'lucide-react';
+import { ArrowRight, BrainCircuit, MessageSquare, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function WelcomeBanner() {
+interface WelcomeBannerProps { userName: string; hasDocuments: boolean; }
+
+export default function WelcomeBanner({ userName, hasDocuments }: WelcomeBannerProps) {
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-blue-700 to-slate-900 p-8 text-white shadow-lg">
-      {/* Background Decoration */}
-      <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-      <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-blue-400/10 blur-3xl" />
-
-      <div className="relative flex flex-col justify-between gap-8 lg:flex-row lg:items-center">
-        {/* Left */}
+    <section className="relative overflow-hidden rounded-3xl border border-violet-300 bg-gradient-to-br from-[#5d3bb8] via-[#9560ce] to-[#ed78a5] p-7 text-white shadow-lg shadow-violet-200/70 sm:p-9">
+      <div className="absolute right-0 top-0 h-48 w-48 rounded-full bg-[#ffd6e4]/35 blur-3xl" />
+      <div className="absolute -bottom-20 left-1/3 h-44 w-72 rounded-full bg-[#7ee4f7]/20 blur-3xl" />
+      <div className="relative flex flex-col justify-between gap-8 xl:flex-row xl:items-end">
         <div className="max-w-2xl">
-          <span className="inline-flex rounded-full bg-white/15 px-4 py-1 text-sm font-medium backdrop-blur">
-            🚀 Enterprise AI Knowledge Platform
-          </span>
-
-          <h1 className="mt-5 text-4xl font-bold tracking-tight">
-            Welcome to DocHive
-          </h1>
-
-          <p className="mt-4 max-w-xl text-lg leading-8 text-blue-100">
-            Upload documents, build an intelligent knowledge base,
-            and chat with your organization's information using AI.
-          </p>
-
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white/15 px-3 py-1.5 text-xs font-medium tracking-wide text-white"><BrainCircuit size={14} /> Enterprise AI knowledge platform</span>
+          <h1 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">Welcome back, {userName}.</h1>
+          <p className="mt-4 max-w-xl text-base leading-7 text-white/85">Turn your organization&apos;s documents into grounded answers with a secure, searchable AI knowledge base.</p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link
-              to="/upload"
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-3 font-semibold text-blue-700 transition hover:scale-105 hover:shadow-xl"
-            >
-              <Upload size={18} />
-              Upload Document
-            </Link>
-
-            <Link
-              to="/chat"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/30 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur transition hover:bg-white/20"
-            >
-              <MessageSquare size={18} />
-              Open AI Chat
-              <ArrowRight size={18} />
-            </Link>
+            <Link to="/upload" className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#6b3bb6] shadow-sm transition hover:bg-[#fff0f6]"><Upload size={18} /> Upload document</Link>
+            {hasDocuments && <Link to="/chat" className="inline-flex items-center gap-2 rounded-xl border border-white/35 bg-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/25"><MessageSquare size={18} /> Open AI Chat <ArrowRight size={18} /></Link>}
           </div>
         </div>
-
-        {/* Right */}
-        <div className="grid grid-cols-2 gap-5">
-          <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-sm text-blue-100">
-              AI Responses
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold">
-              Instant
-            </h2>
-          </div>
-
-          <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-sm text-blue-100">
-              Semantic Search
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold">
-              Enabled
-            </h2>
-          </div>
-
-          <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-sm text-blue-100">
-              RAG Pipeline
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold">
-              Active
-            </h2>
-          </div>
-
-          <div className="rounded-2xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-sm text-blue-100">
-              Workspace
-            </p>
-
-            <h2 className="mt-2 text-3xl font-bold">
-              Ready
-            </h2>
-          </div>
+        <div className="grid grid-cols-2 gap-3 sm:min-w-80">
+          <div className="rounded-2xl border border-white/25 bg-white/15 p-4"><p className="text-xs font-medium text-white/70">Retrieval</p><p className="mt-1.5 text-sm font-semibold">Vector search</p></div>
+          <div className="rounded-2xl border border-white/25 bg-white/15 p-4"><p className="text-xs font-medium text-white/70">Responses</p><p className="mt-1.5 text-sm font-semibold">AI-assisted</p></div>
         </div>
       </div>
     </section>

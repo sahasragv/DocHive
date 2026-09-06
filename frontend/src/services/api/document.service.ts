@@ -1,4 +1,5 @@
 import api from './api';
+import type { Document } from '../../types/document';
 
 export const uploadDocument = async (
   file: File,
@@ -20,8 +21,8 @@ export const uploadDocument = async (
   return response.data;
 };
 
-export const getDocuments = async () => {
-  const response = await api.get('/documents');
+export const getDocuments = async (): Promise<Document[]> => {
+  const response = await api.get<Document[]>('/documents');
 
   return response.data;
 };

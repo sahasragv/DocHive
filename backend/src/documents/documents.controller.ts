@@ -41,7 +41,9 @@ export class DocumentsController {
 
         if (!allowedMimeTypes.includes(file.mimetype)) {
           return cb(
-            new Error('Only PDF and DOCX files are allowed'),
+            new Error(
+              'Only PDF and DOCX files are allowed',
+            ),
             false,
           );
         }
@@ -50,7 +52,7 @@ export class DocumentsController {
       },
 
       limits: {
-        fileSize: 10 * 1024 * 1024, // 10 MB
+        fileSize: 10 * 1024 * 1024,
       },
     }),
   )
@@ -65,14 +67,20 @@ export class DocumentsController {
   }
 
   @Get()
-  async getDocuments() {
-    return this.documentsService.findAll();
+  async getDocuments(@Req() req: any) {
+    return this.documentsService.findAll(
+      req.user.userId,
+    );
   }
 
   @Delete(':id')
   async deleteDocument(
     @Param('id') id: string,
+    @Req() req: any,
   ) {
-    return this.documentsService.deleteDocument(id);
+    return this.documentsService.deleteDocument(
+      id,
+      req.user.userId,
+    );
   }
 }
