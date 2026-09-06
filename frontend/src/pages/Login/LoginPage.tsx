@@ -3,10 +3,12 @@ import type { FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+import { useAuth } from '../../contexts';
 import { login, register } from '../../services/api';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { refreshProfile } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +55,7 @@ const LoginPage = () => {
         response.accessToken,
       );
 
+      await refreshProfile();
       navigate('/dashboard');
     } catch (err) {
       if (axios.isAxiosError(err)) {
