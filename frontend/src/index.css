@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+/* DocHive visual theme: violet / lavender foundation with warm pink accents. */
+:root { --dochive-violet: #7653d6; --dochive-violet-deep: #5834b6; --dochive-pink: #f05b8d; --dochive-pink-soft: #ffe4ee; --dochive-lavender: #f7f4ff; --dochive-lavender-strong: #ede7ff; }
+body { background: var(--dochive-lavender); }

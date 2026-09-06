@@ -1,119 +1,30 @@
-import {
-  ArrowRight,
-  CheckCircle2,
-  Clock3,
-  FileText,
-} from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock3, File, FileText, LoaderCircle, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import type { Document } from '../../types/document';
 
-interface RecentDocumentsProps {
-  documents: Array<{
-    id: string;
-    name: string;
-    status: string;
-  }>;
-}
+interface RecentDocumentsProps { documents: Document[]; }
 
-export default function RecentDocuments({
-  documents,
-}: RecentDocumentsProps) {
+const formatSize = (size: number) => size < 1024 ? `${size} B` : size < 1024 * 1024 ? `${(size / 1024).toFixed(1)} KB` : `${(size / (1024 * 1024)).toFixed(1)} MB`;
+const fileType = (document: Document) => document.originalName.split('.').pop()?.toUpperCase() || document.mimetype || 'FILE';
+const statusDetails = (value: string) => {
+  const status = value.toLowerCase();
+  if (status.includes('indexed')) return { label: 'Indexed', Icon: CheckCircle2, style: 'bg-emerald-50 text-emerald-700 ring-emerald-600/10' };
+  if (status.includes('fail')) return { label: 'Failed', Icon: XCircle, style: 'bg-rose-50 text-rose-700 ring-rose-600/10' };
+  if (status.includes('process')) return { label: 'Processing', Icon: LoaderCircle, style: 'bg-amber-50 text-amber-700 ring-amber-600/10' };
+  return { label: value || 'Uploaded', Icon: Clock3, style: 'bg-slate-100 text-slate-700 ring-slate-600/10' };
+};
+
+export default function RecentDocuments({ documents }: RecentDocumentsProps) {
   return (
     <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">
-            Recent Documents
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
-            Recently uploaded knowledge sources
-          </p>
-        </div>
-
-        <Link
-          to="/documents"
-          className="flex items-center gap-2 text-sm font-semibold text-blue-600 transition hover:text-blue-700"
-        >
-          View All
-          <ArrowRight size={16} />
-        </Link>
+      <div className="flex items-center justify-between border-b border-violet-100 px-6 py-5"><div><h2 className="text-xl font-semibold text-slate-900">Recent documents</h2><p className="mt-1 text-sm text-slate-500">Recently uploaded knowledge sources</p></div><Link to="/documents" className="flex items-center gap-2 text-sm font-semibold text-[#7653d6] transition hover:text-[#5834b6]">View all <ArrowRight size={16} /></Link></div>
+      <div className="divide-y divide-slate-100">
+        {documents.map((document) => {
+          const status = statusDetails(document.status);
+          const StatusIcon = status.Icon;
+          return <Link key={document.id} to="/documents" className="group flex items-center justify-between px-6 py-5 transition hover:bg-[#faf8ff]"><div className="flex min-w-0 items-center gap-4"><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f1ecff]"><FileText size={22} className="text-[#7653d6]" /></div><div className="min-w-0"><h3 className="truncate font-semibold text-slate-900">{document.originalName}</h3><div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-500"><span className="inline-flex items-center gap-1"><File size={13} /> {fileType(document)}</span><span>{formatSize(document.size)}</span><span>{document.chunkCount} chunks</span><span>{new Date(document.uploadedAt).toLocaleDateString()}</span></div></div></div><span className={`ml-4 hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 sm:inline-flex ${status.style}`}><StatusIcon size={13} className={status.label === 'Processing' ? 'animate-spin' : undefined} />{status.label}</span><ArrowRight size={18} className="ml-4 shrink-0 text-slate-400 transition group-hover:translate-x-1 group-hover:text-[#7653d6]" /></Link>;
+        })}
       </div>
-
-      {/* Empty State */}
-      {documents.length === 0 ? (
-        <div className="flex flex-col items-center justify-center px-6 py-16">
-          <div className="mb-4 rounded-2xl bg-slate-100 p-5">
-            <FileText
-              size={34}
-              className="text-slate-400"
-            />
-          </div>
-
-          <h3 className="text-lg font-semibold text-slate-900">
-            No documents uploaded
-          </h3>
-
-          <p className="mt-2 text-center text-sm text-slate-500">
-            Upload your first document to start building
-            your AI knowledge base.
-          </p>
-
-          <Link
-            to="/upload"
-            className="mt-6 rounded-2xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700"
-          >
-            Upload Document
-          </Link>
-        </div>
-      ) : (
-        <div className="divide-y divide-slate-100">
-          {documents.map((document) => (
-            <div
-              key={document.id}
-              className="group flex items-center justify-between px-6 py-5 transition hover:bg-slate-50"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100">
-                  <FileText
-                    size={22}
-                    className="text-blue-600"
-                  />
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-slate-900">
-                    {document.name}
-                  </h3>
-
-                  <div className="mt-2 flex items-center gap-3">
-                    {document.status === 'Indexed' ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                        <CheckCircle2 size={14} />
-                        Indexed
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-                        <Clock3 size={14} />
-                        Processing
-                      </span>
-                    )}
-
-                    <span className="text-xs text-slate-400">
-                      Just now
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <ArrowRight
-                size={18}
-                className="text-slate-400 transition group-hover:translate-x-1 group-hover:text-blue-600"
-              />
-            </div>
-          ))}
-        </div>
-      )}
     </section>
   );
 }
